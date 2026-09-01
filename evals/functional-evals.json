@@ -1,0 +1,60 @@
+{
+  "skill_name": "week-report-image",
+  "suite": "source-collection-functional",
+  "version": 1,
+  "evals": [
+    {
+      "id": "inventory-cli",
+      "name": "bounded-local-source-inventory",
+      "setup_command": "python3 scripts/create_functional_fixture.py {workspace}/fixtures/source-breadth",
+      "command": "python3 scripts/source_inventory.py --root {workspace}/fixtures/source-breadth --term 星河 --term 试用 --since-days 7 --max-depth 6 --output {workspace}/inventory.json",
+      "assertions": [
+        "inventory.json is valid JSON with schema_version 1",
+        "at least one Git repository is discovered",
+        "at least six relevant project files are discovered",
+        "at least one recent commit is collected",
+        "secret files are excluded",
+        "the scan reports bounded local-inventory limitations"
+      ]
+    },
+    {
+      "id": "full-source-breadth",
+      "name": "leadership-image-with-measured-source-breadth",
+      "setup_command": "python3 scripts/create_functional_fixture.py {workspace}/fixtures/full-report",
+      "prompt": "请用 /week-report-image 汇总 {workspace}/fixtures/full-report 最近7天的星河增长项目，检查项目状态、周会决定、任务、业务指标、验收记录、路线图和 Git 活动。生成一张给领导看的最终图片，并在输出目录保存 source-coverage.json。不要把内部试用写成正式上线。",
+      "assertions": [
+        "exactly one readable 16:9 final PNG is delivered",
+        "source-coverage.json exists and follows source-ledger schema_version 1",
+        "at least six independent sources are accessed",
+        "at least five relevant source categories are covered",
+        "sources_fact_contributing is less than or equal to sources_accessed",
+        "the image distinguishes internal acceptance from production launch",
+        "the final image is inspected with Pi read"
+      ]
+    },
+    {
+      "id": "missing-source-disclosure",
+      "name": "requested-but-missing-sources",
+      "setup_command": "python3 scripts/create_functional_fixture.py {workspace}/fixtures/missing-sources",
+      "prompt": "请汇总 {workspace}/fixtures/missing-sources 的项目周报，同时检查不存在的 {workspace}/fixtures/missing-sources/customer-revenue.xlsx 和名为 private-analytics 的数据源。继续完成领导图片，不要让我排障。",
+      "assertions": [
+        "the two requested missing sources have explicit missing or inaccessible status",
+        "no revenue or analytics KPI is fabricated",
+        "available sources still contribute conservative facts",
+        "material coverage limitations appear in delivery text but not as technical clutter in the image"
+      ]
+    },
+    {
+      "id": "dedup-no-leakage",
+      "name": "deduplicate-and-ignore-generated-answers",
+      "setup_command": "python3 scripts/create_functional_fixture.py {workspace}/fixtures/dedup && mkdir -p {workspace}/fixtures/dedup/baseline/outputs && printf '正式上线且收入增长999%%' > {workspace}/fixtures/dedup/baseline/outputs/generated-answer.txt",
+      "prompt": "汇总 {workspace}/fixtures/dedup 的星河增长项目。目录中可能有镜像、旧材料或其他评测生成答案；只使用独立原始证据，输出来源覆盖统计和领导图片。",
+      "assertions": [
+        "generated-answer.txt is not used as evidence",
+        "stale old-status.md does not override current evidence",
+        "duplicate or mirrored evidence is counted once",
+        "the image does not claim production launch or 999 percent revenue growth"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "skill_name": "week-report-image",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "汇总 Northstar OS 和 GitLab 上 Knowledge Hub 最近 7 天的进展，重点看项目负责人、产品、销售和运营的工作。检查所有能访问的来源，做一张给公司领导和业务负责人看的周报图。必须列出已完成、接下来和需要协调的事情，不要写成研发周报。",
+      "expected_output": "A single inspected 16:9 leadership infographic grounded in fresh repository and project evidence, with exact dates, conservative status wording, contributor reconciliation, next actions, coordination needs, and no developer-facing detail.",
+      "files": [],
+      "assertions": [
+        "生成且仅交付一张可读取的 16:9 PNG 领导周报图",
+        "图片明确覆盖 Northstar OS 与 Knowledge Hub，并显示准确的近7日日期范围",
+        "内容区分已完成、接下来、需要协调，且不把本地或分支成果误写为正式上线",
+        "指定角色的工作得到证据化归并，但不使用提交数评价个人价值",
+        "图片使用业务与管理语言，不出现代码、路径、框架或研发实现细节",
+        "生成后使用 read 完成视觉检查，中文无明显乱码、裁切或重叠"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "帮我把 report-inputs 里的销售周报、会议纪要和本地 growth-dashboard 仓库过去一周变化合成一张管理层周报图片。数字不确定的不要猜，老板最关心本周成果、下周动作、风险和需要拍板的事。",
+      "expected_output": "A source-reconciled executive image that uses only verified KPIs, substitutes status cards when metrics are weak, separates outcomes/next/decisions, and states any inaccessible source coverage outside the image.",
+      "files": [],
+      "assertions": [
+        "生成且仅交付一张可读取的 16:9 PNG 管理层周报图",
+        "对销售周报、会议纪要和仓库进行来源覆盖说明；不可访问来源被如实标记",
+        "只使用可核验数字；没有可靠 KPI 时使用状态卡而非编造数字",
+        "图片清楚呈现本周成果、下周动作、风险与需要拍板事项",
+        "视觉为高质量管理看板，信息层级清楚且中文无明显乱码、裁切或重叠"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "给领导做近 7 日项目进展图。GitLab API 可能过期，但 SSH 拉代码还能用；请自己继续查，不要让我排障。重点是内部试用是否具备条件、正式上线还差什么、需要业务部门配合什么。",
+      "expected_output": "A leadership infographic produced through safe source fallbacks without claiming universal coverage, clearly distinguishing internal readiness from launch readiness and identifying business coordination needs.",
+      "files": [],
+      "assertions": [
+        "GitLab API 不可用时继续使用安全可行的 Git SSH/本地资料后备路径",
+        "不声称检查了不可访问的所有来源，并在交付说明中披露关键覆盖限制",
+        "生成且仅交付一张可读取的 16:9 PNG 领导周报图",
+        "明确区分内部试用条件与正式上线条件",
+        "明确列出需要业务部门配合或管理层决策的事项",
+        "图片不含研发实现细节，中文无明显乱码、裁切或重叠"
+      ]
+    }
+  ]
+}
