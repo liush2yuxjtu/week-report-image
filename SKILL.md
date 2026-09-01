@@ -147,7 +147,7 @@ Check every gate in `references/image-quality.md`:
 - leadership audience is preserved;
 - risks and incomplete states are not disguised as completion.
 
-If any blocking defect exists, revise the prompt and regenerate once. Prefer simplifying text over shrinking it. Deliver the best inspected image, not both candidates, unless the user requests alternatives.
+If any blocking defect exists, revise the prompt and regenerate once. Prefer simplifying text over shrinking it. Inspect the regenerated image against every gate again. If any blocking defect remains, do not deliver it as a validated report: state which gates failed and request permission before spending quota on another attempt. Deliver only an image that passes text accuracy, factual support, layout, audience, and completion-state checks.
 
 ## 7. Final response
 

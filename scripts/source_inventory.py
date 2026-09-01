@@ -16,15 +16,21 @@ from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
 PRUNE = {
-    ".git", "node_modules", "Library", ".Trash", ".cache", ".npm", ".pnpm-store",
+    ".git", "node_modules", "library", ".trash", ".cache", ".npm", ".pnpm-store",
     "dist", "build", ".next", ".venv", "venv", "__pycache__",
+}
+SENSITIVE_DIRS = {
+    ".ssh", ".gnupg", ".aws", ".azure", ".kube", ".docker",
+    ".password-store", ".secrets", "secrets", "credentials",
 }
 TEXT_EXT = {".md", ".txt", ".csv", ".json", ".jsonl", ".yaml", ".yml", ".toml", ".log"}
 DOC_EXT = TEXT_EXT | {".pdf", ".docx", ".xlsx", ".xls", ".pptx"}
 SECRET_NAMES = {".env", ".env.local", ".npmrc", ".pypirc", "credentials", "credentials.json"}
+SECRET_EXT = {".key", ".pem", ".p12", ".pfx"}
 
 
 def run(cmd: list[str], cwd: Path | None = None) -> str:
+    """Run a bounded read-only subprocess and return stdout on success."""
     try:
         p = subprocess.run(cmd, cwd=cwd, text=True, capture_output=True, timeout=20)
         return p.stdout.strip() if p.returncode == 0 else ""
@@ -33,6 +39,7 @@ def run(cmd: list[str], cwd: Path | None = None) -> str:
 
 
 def safe_remote(url: str) -> str:
+    """Remove credentials and query material from a Git remote URL."""
     if not url:
         return ""
     if "://" in url:
@@ -44,7 +51,20 @@ def safe_remote(url: str) -> str:
     return re.sub(r"^[^@\s]+@", "", url)
 
 
+def is_sensitive_path(path: Path) -> bool:
+    """Return true when a path could contain credentials or private keys."""
+    name = path.name.lower()
+    parts = {part.lower() for part in path.parts}
+    if parts & SENSITIVE_DIRS:
+        return True
+    if name in SECRET_NAMES or name.startswith(".env") or path.suffix.lower() in SECRET_EXT:
+        return True
+    stem = path.stem.lower()
+    return any(token in stem for token in ("secret", "credential", "access_token", "auth_token"))
+
+
 def relevant(path: Path, terms: list[str]) -> tuple[bool, list[str]]:
+    """Match a non-sensitive candidate by filename or bounded text content."""
     low = path.name.lower()
     hits = [t for t in terms if t in low]
     if hits:
@@ -62,6 +82,7 @@ def relevant(path: Path, terms: list[str]) -> tuple[bool, list[str]]:
 
 
 def git_info(repo: Path, cutoff: str, terms: list[str]) -> dict:
+    """Collect redacted remotes and recent commit metadata for one repository."""
     remote_lines = run(["git", "remote", "-v"], repo).splitlines()
     remotes = sorted({safe_remote(x.split()[1]) for x in remote_lines if len(x.split()) >= 2})
     fmt = "%H%x09%aI%x09%an%x09%ae%x09%s"
@@ -92,11 +113,17 @@ def git_info(repo: Path, cutoff: str, terms: list[str]) -> dict:
 
 
 def walk(root: Path, max_depth: int):
+    """Yield bounded repository and document candidates below one root."""
     base_depth = len(root.parts)
     for current, dirs, files in os.walk(root):
         cur = Path(current)
         depth = len(cur.parts) - base_depth
-        dirs[:] = [d for d in dirs if d not in PRUNE and not d.startswith(".cache")]
+        dirs[:] = [
+            d for d in dirs
+            if d.lower() not in PRUNE
+            and d.lower() not in SENSITIVE_DIRS
+            and not d.lower().startswith(".cache")
+        ]
         if depth >= max_depth:
             dirs[:] = []
         if (cur / ".git").exists():
@@ -104,13 +131,14 @@ def walk(root: Path, max_depth: int):
             dirs[:] = [d for d in dirs if d != ".git"]
         for name in files:
             p = cur / name
-            if name in SECRET_NAMES or name.startswith(".env"):
+            if is_sensitive_path(p):
                 continue
             if p.suffix.lower() in DOC_EXT:
                 yield "file", p
 
 
 def main() -> int:
+    """Inventory relevant local sources and write a structured JSON report."""
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", action="append", required=True)
     ap.add_argument("--term", action="append", default=[])

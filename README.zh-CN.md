@@ -8,7 +8,7 @@
 
 ![Week Report Image 中文介绍](assets/week-report-image-zh.png)
 
-把分散在多个来源中的一周证据，变成一张经过核验、适合领导快速决策的 16:9 周报图。
+把过去一周分散在多个来源中的证据，变成一张经过核验、适合领导快速决策的 16:9 周报图。
 
 `week-report-image` 会智能寻找相关来源、量化覆盖范围、处理证据冲突、把研发活动转成业务语言，通过 `imagegen` 生成最终图片，并在交付前检查 PNG。
 
@@ -107,7 +107,7 @@ Create a weekly progress image for leadership from all reachable project sources
 python3 scripts/create_functional_fixture.py /tmp/week-report-image-fixture
 python3 scripts/source_inventory.py \
   --root /tmp/week-report-image-fixture \
-  --term 星河 --term 试用 \
+  --term 星河 --term 试用 --term 试点 \
   --since-days 7 --max-depth 6 \
   --output /tmp/week-report-image-inventory.json
 ```

@@ -6,20 +6,34 @@ import argparse
 import datetime as dt
 import json
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
 
 def run(cmd: list[str], cwd: Path, env=None):
+    """Run one fixture setup command and fail with captured diagnostics."""
     subprocess.run(cmd, cwd=cwd, env=env, check=True, capture_output=True, text=True)
 
 
+def prepare_root(root: Path) -> None:
+    """Create an empty fixture-owned root without deleting arbitrary data."""
+    marker = root / ".week-report-image-fixture"
+    if root.exists() and any(root.iterdir()):
+        if not marker.is_file():
+            raise SystemExit(f"refusing to replace non-fixture directory: {root}")
+        shutil.rmtree(root)
+    root.mkdir(parents=True, exist_ok=True)
+    marker.write_text("fixture-owned\n")
+
+
 def main() -> int:
+    """Create a repeatable seven-source fixture at the requested path."""
     ap = argparse.ArgumentParser()
     ap.add_argument("output")
     args = ap.parse_args()
     root = Path(args.output).expanduser().resolve()
-    root.mkdir(parents=True, exist_ok=True)
+    prepare_root(root)
     now = dt.datetime.now().astimezone()
     today = now.date().isoformat()
 

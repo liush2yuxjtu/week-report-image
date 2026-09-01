@@ -108,7 +108,7 @@ Deterministic smoke test:
 python3 scripts/create_functional_fixture.py /tmp/week-report-image-fixture
 python3 scripts/source_inventory.py \
   --root /tmp/week-report-image-fixture \
-  --term 星河 --term 试用 \
+  --term 星河 --term 试用 --term 试点 \
   --since-days 7 --max-depth 6 \
   --output /tmp/week-report-image-inventory.json
 ```
